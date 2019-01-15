@@ -14,6 +14,10 @@ function makeError(response, message, code) {
 }
 
 function validName(name) {
+	if (typeof name !== "string") {
+		return false;
+	}
+
 	return !(name.replace(/[^a-zA-Z]/g, "").match(/server/gi));
 }
 
