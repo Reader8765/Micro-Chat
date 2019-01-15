@@ -6,6 +6,8 @@ try {
 	});
 
 	const msg = document.getElementById("msg");
+	const send = document.getElementById("send");
+
 	socket.on("msg", ({ message, who, color }) => {
 		const p = document.createElement("p");
 
@@ -21,6 +23,8 @@ try {
 		p.appendChild(name);
 		p.appendChild(text);
 		msg.appendChild(p);
+
+		send.scrollIntoView();
 	});
 	socket.on("clear", count => {
 		Array.from(msg.childNodes).slice(count * -1).forEach(element => element.remove());
@@ -29,8 +33,6 @@ try {
 	socket.on("nameset", (name) => {
 		localStorage.setItem("nickname", name);
 	})
-
-	const send = document.getElementById("send");
 
 	function submit() {
 		socket.emit("newmsg", send.value);
