@@ -1,6 +1,9 @@
 const e = require("express");
 const app = e();
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
 const http = require("http")
 const serv = http.Server(app);
 

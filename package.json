@@ -1,6 +1,7 @@
 {
 	"main": "index.js",
 	"dependencies": {
+		"body-parser": "^1.18.3",
 		"express": "4.16.4",
 		"socket.io": "2.2.0",
 		"short-id": "0.1.0-1",
