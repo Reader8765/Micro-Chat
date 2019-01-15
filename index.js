@@ -13,11 +13,17 @@ function makeError(response, message, code) {
 	});
 }
 
+function validName(name) {
+	return !(name.replace(/[^a-zA-Z]/g, "").match(/server/gi));
+}
+
 app.post("/api/v1/message", (req, res) => {
 	if (!req.body || Object.keys(req.body).length === 0) {
 		return makeError(res, "Provide a body.", 1);
 	} else if (!req.body.content) {
 		return makeError(res, "Provide content for the message.", 2);
+	} else if (req.body.nickname && !validName(req.body.nickname)) {
+		return makeError(res, "The nickname is invalid.", 3);
 	} else {
 		const msg = {
 			message: req.body.content,
@@ -61,7 +67,7 @@ io.on("connection", socket => {
 	let dabCount = 0;
 
 	function setName(newID, silent) {
-		if (newID.replace(/[^a-zA-Z]/g, "").match(/server/gi)) {
+		if (!validName(newID)) {
 			if (!silent) {
 				sys("Don't impersonate the server.");
 			}
