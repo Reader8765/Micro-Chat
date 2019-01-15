@@ -4,6 +4,32 @@ const app = e();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
+function makeError(response, message, code) {
+	return response.json({
+		error: {
+			message,
+			code,
+		},
+	});
+}
+
+app.post("/api/v1/message", (req, res) => {
+	if (!req.body || Object.keys(req.body).length === 0) {
+		return makeError(res, "Provide a body.", 1);
+	} else if (!req.body.content) {
+		return makeError(res, "Provide content for the message.", 2);
+	} else {
+		const msg = {
+			message: req.body.content,
+			who: req.body.nickname || "Unknown",
+			color: "black",
+		};
+		io.emit("msg", msg);
+
+		return res.json(msg);
+	}
+});
+
 const http = require("http")
 const serv = http.Server(app);
 
