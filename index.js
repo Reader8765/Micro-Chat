@@ -1,3 +1,12 @@
+let config = {
+	port: 8585,
+};
+try {
+	config = Object.assign(config, require("./config.json"));
+} catch (error) {
+	// swallow peacefully
+}
+
 const e = require("express");
 const app = e();
 
@@ -83,6 +92,6 @@ io.on("connection", socket => {
 
 app.use(e.static("./static"))
 
-serv.listen(8585, () => {
+serv.listen(config.port, () => {
 	console.log("It's time")
 });
