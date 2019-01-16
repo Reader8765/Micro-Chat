@@ -21,6 +21,23 @@ const serv = http.Server(app);
 
 const sid = require("short-id").generate;
 const ord = require("ordinal")
+const io = require("socket.io")(serv);
+
+function sendMessage(source = "none", msg = {}, socket = true) {
+	if (socket) {
+		// Socket.io
+		io.emit("msg", {
+			message: msg.content,
+			who: msg.sender,
+			color: msg.color || "black",
+		});
+	}
+
+	if (source !== "reddit-chat") {
+		// Reddit Chat
+		sendToRC(msg.sender, msg.content);
+	}
+}
 
 function sendToRC(id, message) {
 	if (redditChatChannel && redditChatChannel.sendUserMessage) {
@@ -35,22 +52,32 @@ function sendToRC(id, message) {
 	}
 }
 
-const io = require("socket.io")(serv);
 io.on("connection", socket => {
 	let id = sid();
 	function sys(message, type = "self") {
-		const things = ["msg", {
-			message,
-			who: "[Server]",
-			color: "blue",
-		}];
-
 		if (type === "self") {
-			socket.emit(...things);
+			socket.emit("msg", {
+				message,
+				who: "[Server]",
+				color: "blue",
+			});
 		} else if (type === "global") {
-			io.emit(...things);
+			sendMessage("server", {
+				content: message,
+				sender: "[Server]",
+				color: "blue",
+			});
 		} else if (type === "others") {
-			socket.broadcast.emit(...things);
+			sendMessage("server", {
+				content: message,
+				sender: "[Server]",
+				color: "blue",
+			}, false);
+			socket.broadcast.emit("msg", {
+				message,
+				who: "[Server]",
+				color: "blue",
+			});
 		}
 	}
 	sys("Welcome to the chat room!");
@@ -99,12 +126,10 @@ io.on("connection", socket => {
 				sys("Don't flood the chat.");
 			} else {
 				lastMsg = message;
-				io.emit("msg", {
-					message,
-					who: id,
-					color: "black"
+				sendMessage("client", {
+					content: message,
+					sender: id,
 				});
-				sendToRC(id, message);
 			}
 		}
 	});
@@ -146,11 +171,9 @@ if (config.redditChat) {
 		const handler = new redditChat.ChannelHandler();
 		handler.onMessageReceived = (channel, message) => {
 			if (channel.url === config.redditChat.channel && message._sender.nickname !== selfName) {
-				console.log("forwarding RC message to websockets")
-				io.emit("msg", {
-					message: message.message,
-					who: message._sender.nickname,
-					color: "black"
+				sendMessage("reddit-chat", {
+					content: message.message,
+					sender: message._sender.nickname,
 				});
 			}
 		}
