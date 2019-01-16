@@ -3,7 +3,9 @@
   "dependencies": {
     "express": "4.16.4",
     "socket.io": "2.2.0",
+    "sendbird": "^3.0.92",
     "short-id": "0.1.0-1",
     "ordinal": "1.0.2"
+    "snoowrap": "^1.15.2",
   }
 }
